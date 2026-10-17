@@ -6,6 +6,7 @@ Saat ini tersedia dua halaman:
 
 - `/` — showcase UI kit (Card, Alert, Badge, Button, Button Group, Form Controls, Placeholder, Spinner, Breadcrumb, Tabs, Collapse, Stepper, Pagination, List Group, Accordion, Table, Data Table, Modal, Toast, Dropdown, Tooltip).
 - `/dashboard` — dashboard Poinqu dari template asli.
+- `/login` — halaman login admin Poinqu (demo, redirect ke dashboard).
 
 ## Menjalankan
 
@@ -32,8 +33,10 @@ app/
   globals.css                 # token warna, tipografi, spacing, motion, reset
   layout.tsx                  # font Inter, metadata, Iconify, ToastProvider
   page.tsx                    # showcase UI kit
+  login/page.tsx              # halaman login admin
   dashboard/page.tsx          # dashboard Poinqu
 components/
+  auth/LoginPage.tsx          # form login, validasi, reset password, SSO demo
   dashboard/Dashboard.tsx     # state dashboard: sidebar, range, dialog
   showcase/                   # halaman demo komponen + layout showcase
   sidebar/                    # navigasi yang bisa dikonfigurasi (dashboard & demo)
@@ -51,6 +54,7 @@ components/
     AccountModal.tsx          # popup info akun dari sidebar footer
     FormField.tsx             # label, hint, error, aria-describedby otomatis
     Input.tsx                 # input + icon kiri/kanan, invalid, size
+    PasswordInput.tsx         # input password + toggle show/hide
     Select.tsx                # native select yang di-style
     Textarea.tsx              # textarea + invalid state
     Checkbox.tsx              # checkbox + description + indeterminate
@@ -141,5 +145,6 @@ export default function Example() {
 - Data dashboard masih statis dan terpusat di `lib/data.ts`, sehingga mudah diganti dengan API nanti.
 - Sidebar dashboard dan showcase memakai komponen `Sidebar` yang sama; isi navigasi, brand, search, dan profil kini dikirim lewat props.
 - Navigasi sidebar punya area scroll sendiri. Footer akun tetap di bawah sidebar; klik footer membuka `AccountModal` dengan info user, role, workspace, dan status.
+- Halaman `/login` adalah template demo: validasi email/password, show/hide password, remember me, reset password modal, SSO demo, dan redirect ke `/dashboard`. Sign out membawa kembali ke `/login`. Tidak ada autentikasi backend pada tahap ini.
 - Ikon memakai web component [Iconify](https://iconify.design/) yang dimuat dari CDN melalui `next/script`.
 - `next.config.ts` tidak memakai loader `@tailwindcss/turbopack` karena styling memakai CSS Modules; aturan loader tersebut membuat CSS Modules tidak ter-scope dengan benar.

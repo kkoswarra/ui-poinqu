@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { METRICS, SIDEBAR, USER, type RangeValue } from "@/lib/data";
 import Button from "@/components/ui/Button";
 import AccountModal from "@/components/ui/AccountModal";
@@ -24,6 +25,7 @@ type Detail = {
 };
 
 export default function Dashboard() {
+  const router = useRouter();
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("default");
   const [isMobile, setIsMobile] = useState(false);
   const [range, setRange] = useState<RangeValue>("Last week");
@@ -335,13 +337,14 @@ export default function Dashboard() {
         user={USER}
         role="Administrator"
         workspace="Poinqu"
-        onSignOut={() =>
+        onSignOut={() => {
           toast({
             title: "Signed out",
             description: "You have been signed out of the demo workspace.",
             tone: "info",
-          })
-        }
+          });
+          router.push("/login");
+        }}
       />
     </div>
   );

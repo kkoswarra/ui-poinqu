@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 import Icon from "./Icon";
 import styles from "./Form.module.css";
 
@@ -8,6 +8,7 @@ export type InputProps = Omit<
 > & {
   icon?: string;
   iconRight?: string;
+  endAdornment?: ReactNode;
   size?: "sm" | "md";
   invalid?: boolean;
   fullWidth?: boolean;
@@ -16,6 +17,7 @@ export type InputProps = Omit<
 export default function Input({
   icon,
   iconRight,
+  endAdornment,
   size = "md",
   invalid = false,
   fullWidth = false,
@@ -40,6 +42,7 @@ export default function Input({
         {...rest}
       />
       {iconRight ? <Icon name={iconRight} className={styles.inputIcon} /> : null}
+      {endAdornment}
     </div>
   );
 }

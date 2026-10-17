@@ -2117,13 +2117,14 @@ export default function ComponentShowcase() {
         user={USER}
         role="Administrator"
         workspace="Poinqu"
-        onSignOut={() =>
+        onSignOut={() => {
           notify(
             "info",
             "Signed out",
             "You have been signed out of the demo workspace.",
-          )
-        }
+          );
+          router.push("/login");
+        }}
       />
 
       <button
