@@ -1,0 +1,158 @@
+:root {
+  --color-canvas: #ffffff;
+  --color-surface: #ffffff;
+  --color-sidebar: #f8f8f8;
+  --color-frame: #f6f6f6;
+  --color-stripe: #eeeeef;
+  --color-border: #e1e4ea;
+  --color-divider: #eeeeef;
+  --color-text: #1f2937;
+  --color-secondary: #4b5563;
+  --color-muted: #6b7280;
+  --color-subtle: #6b7280;
+  --color-accent: #1f2937;
+  --color-accent-top: #36455a;
+  --color-primary: #1f2937;
+  --color-success: #009b72;
+  --color-danger: #ff3546;
+  --color-warning: #ff862f;
+  --color-yellow: #f2bd50;
+  --color-info: #4268ff;
+  --color-violet: #8b5cf6;
+  --color-cyan: #009cbc;
+  --color-chart-bar: #e7e7e7;
+  --color-chart-base: #f0f0f0;
+  --color-focus: #4268ff;
+  --color-overlay: rgba(31, 41, 55, 0.3);
+  --font-body: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-brand: 18px;
+  --text-heading: 24px;
+  --text-chart: 32px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --leading-body: 1.5;
+  --tracking-heading: -0.8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-inner: 9px;
+  --radius-avatar: 999px;
+  --container-sidebar: 250px;
+  --breakpoint-mobile: 760px;
+
+  /* Shared motion timing for every component. */
+  --duration-fast: 120ms;
+  --duration-normal: 180ms;
+  --duration-panel: 240ms;
+  --duration-data: 320ms;
+  --duration-stagger: 24ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-panel: 0ms;
+    --duration-data: 0ms;
+    --duration-stagger: 0ms;
+  }
+}
+
+html {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+select,
+summary {
+  cursor: pointer;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+iconify-icon {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+/* Thin, modern scrollbars for the whole application. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-text) 22%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-text) 20%, transparent);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-text) 34%, transparent);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

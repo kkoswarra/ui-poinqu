@@ -1,0 +1,188 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: var(--text-xs);
+  color: var(--color-secondary);
+  white-space: nowrap;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.button:hover {
+  background: var(--color-sidebar);
+}
+
+.button:active {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button[data-size="sm"] {
+  min-height: 28px;
+  padding: 4px 8px;
+  font-size: 11px;
+  gap: 5px;
+}
+
+.button[data-icon-only] {
+  width: 32px;
+  padding: 7px;
+}
+
+.button[data-icon-only][data-size="sm"] {
+  width: 28px;
+  padding: 5px;
+}
+
+.button[data-full-width] {
+  width: 100%;
+}
+
+.button[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.button[data-tone="success"] {
+  color: var(--color-success);
+}
+
+.button[data-tone="warning"] {
+  color: var(--color-warning);
+}
+
+.button[data-tone="primary"] {
+  color: var(--color-text);
+}
+
+.button[data-tone="danger"][data-variant="outline"] {
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
+}
+
+.button[data-tone="success"][data-variant="outline"] {
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+}
+
+.button[data-tone="warning"][data-variant="outline"] {
+  border-color: color-mix(in srgb, var(--color-warning) 38%, var(--color-border));
+}
+
+.button[data-tone="primary"][data-variant="outline"] {
+  border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+  color: var(--color-accent);
+}
+
+.button[data-tone="danger"]:hover {
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+}
+
+.button[data-tone="success"]:hover {
+  background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface));
+}
+
+.button[data-tone="warning"]:hover {
+  background: color-mix(in srgb, var(--color-warning) 9%, var(--color-surface));
+}
+
+.button[data-tone="primary"]:hover {
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--color-surface));
+}
+
+.button[data-variant="ghost"] {
+  background: transparent;
+  border-color: transparent;
+}
+
+.button[data-variant="ghost"]:hover {
+  background: var(--color-sidebar);
+}
+
+.button[data-variant="solid"][data-tone="default"] {
+  color: var(--color-surface);
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  border-color: var(--color-accent);
+}
+
+.button[data-variant="solid"][data-tone="primary"] {
+  color: var(--color-surface);
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  border-color: var(--color-accent);
+}
+
+.button[data-variant="solid"][data-tone="danger"] {
+  color: var(--color-surface);
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.button[data-variant="solid"][data-tone="success"] {
+  color: var(--color-surface);
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.button[data-variant="solid"][data-tone="warning"] {
+  color: var(--color-text);
+  background: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.button[data-variant="solid"][data-tone="default"]:hover,
+.button[data-variant="solid"][data-tone="primary"]:hover {
+  background: linear-gradient(var(--color-accent-top), var(--color-accent-top));
+}
+
+.button[data-variant="solid"][data-tone="danger"]:hover {
+  background: color-mix(in srgb, var(--color-danger) 86%, var(--color-text));
+}
+
+.button[data-variant="solid"][data-tone="success"]:hover {
+  background: color-mix(in srgb, var(--color-success) 86%, var(--color-text));
+}
+
+.button[data-variant="solid"][data-tone="warning"]:hover {
+  background: color-mix(in srgb, var(--color-warning) 88%, var(--color-text));
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transform: none;
+  }
+}

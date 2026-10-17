@@ -1,0 +1,94 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 90;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: var(--color-surface);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-text) 20%, transparent);
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tooltipIn var(--duration-fast) var(--ease-standard);
+}
+
+.tooltip[data-placement="top"] {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip[data-placement="bottom"] {
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip[data-placement="left"] {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip[data-placement="right"] {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.arrow {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--color-accent);
+  transform: rotate(45deg);
+}
+
+.tooltip[data-placement="top"] .arrow {
+  bottom: -3px;
+  left: 50%;
+  margin-left: -3px;
+}
+
+.tooltip[data-placement="bottom"] .arrow {
+  top: -3px;
+  left: 50%;
+  margin-left: -3px;
+}
+
+.tooltip[data-placement="left"] .arrow {
+  right: -3px;
+  top: 50%;
+  margin-top: -3px;
+}
+
+.tooltip[data-placement="right"] .arrow {
+  left: -3px;
+  top: 50%;
+  margin-top: -3px;
+}
+
+@keyframes tooltipIn {
+  from {
+    opacity: 0;
+    translate: 0 2px;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+}

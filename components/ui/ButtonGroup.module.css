@@ -1,0 +1,47 @@
+.group {
+  display: inline-flex;
+  align-items: stretch;
+  max-width: 100%;
+}
+
+.group > button {
+  position: relative;
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.group > button:first-child {
+  margin-left: 0;
+  border-radius: var(--radius-control) 0 0 var(--radius-control);
+}
+
+.group > button:last-child {
+  border-radius: 0 var(--radius-control) var(--radius-control) 0;
+}
+
+.group > button:only-child {
+  border-radius: var(--radius-control);
+}
+
+.group > button:hover {
+  z-index: 1;
+}
+
+.group > button:focus-visible {
+  z-index: 2;
+}
+
+.group > button[aria-pressed="true"] {
+  z-index: 1;
+  color: var(--color-surface);
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  border-color: var(--color-accent);
+}
+
+.group > button[aria-pressed="true"]:hover {
+  background: linear-gradient(var(--color-accent-top), var(--color-accent-top));
+}
+
+.group > button:disabled {
+  opacity: 0.5;
+}

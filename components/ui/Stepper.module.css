@@ -1,0 +1,191 @@
+.stepper {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.step {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 30px;
+  right: 0;
+  height: 2px;
+  background: var(--color-divider);
+  z-index: 0;
+}
+
+.step[data-state="complete"]:not(:last-child)::after {
+  background: var(--color-success);
+}
+
+.stepper[data-orientation="horizontal"] .stepAction {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.stepper[data-orientation="horizontal"] .texts {
+  padding-top: 0;
+}
+
+.stepAction {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button.stepAction {
+  cursor: pointer;
+}
+
+button.stepAction:hover .indicator {
+  border-color: var(--color-accent);
+}
+
+button.stepAction:hover .label {
+  color: var(--color-text);
+}
+
+button.stepAction:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-control);
+}
+
+.indicator {
+  display: grid;
+  place-items: center;
+  position: relative;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  z-index: 1;
+  transition:
+    background-color var(--duration-normal) var(--ease-standard),
+    border-color var(--duration-normal) var(--ease-standard),
+    color var(--duration-normal) var(--ease-standard),
+    box-shadow var(--duration-normal) var(--ease-standard);
+}
+
+.indicator iconify-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.step[data-state="complete"] .indicator {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-surface);
+}
+
+.step[data-state="current"] .indicator {
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  border-color: var(--color-accent);
+  color: var(--color-surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.label {
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1.35;
+}
+
+.step[data-state="upcoming"] .label {
+  color: var(--color-muted);
+}
+
+.description {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.stepper[data-orientation="vertical"] {
+  flex-direction: column;
+}
+
+.stepper[data-orientation="vertical"] .step {
+  flex: none;
+  padding-bottom: 20px;
+}
+
+.stepper[data-orientation="vertical"] .step:not(:last-child)::after {
+  top: 30px;
+  bottom: 0;
+  left: 13px;
+  right: auto;
+  width: 2px;
+  height: auto;
+}
+
+@media (max-width: 760px) {
+  .stepper[data-orientation="horizontal"] {
+    flex-direction: column;
+  }
+
+  .stepper[data-orientation="horizontal"] .step {
+    flex: none;
+    padding-bottom: 18px;
+  }
+
+  .stepper[data-orientation="horizontal"] .step:not(:last-child)::after {
+    top: 30px;
+    bottom: 0;
+    left: 13px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+
+  .stepper[data-orientation="horizontal"] .stepAction {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .stepper[data-orientation="horizontal"] .texts {
+    padding-top: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indicator {
+    transition: none;
+  }
+}

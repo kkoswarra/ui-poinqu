@@ -1,0 +1,90 @@
+.wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow: auto;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--text-sm);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.caption {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-muted);
+  font-size: 11px;
+  text-align: left;
+}
+
+.head .headerCell {
+  height: 36px;
+  padding: 0 12px;
+  border-top: 1px solid var(--color-divider);
+  border-bottom: 1px solid var(--color-divider);
+  background: var(--color-sidebar);
+  color: var(--color-secondary);
+  font-weight: var(--weight-regular);
+  text-align: left;
+}
+
+.head .headerCell:first-child {
+  border-left: 1px solid var(--color-divider);
+  border-radius: 8px 0 0 8px;
+}
+
+.head .headerCell:last-child {
+  border-right: 1px solid var(--color-divider);
+  border-radius: 0 8px 8px 0;
+}
+
+.cell {
+  height: 44px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-divider);
+  color: var(--color-text);
+}
+
+.body .row:last-child .cell {
+  border-bottom: 0;
+}
+
+.row {
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.row:hover {
+  background: color-mix(in srgb, var(--color-sidebar) 60%, var(--color-surface));
+}
+
+.row[data-selected] {
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+}
+
+.row[data-selected]:hover {
+  background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
+}
+
+.cell[data-align="center"],
+.headerCell[data-align="center"] {
+  text-align: center;
+}
+
+.cell[data-align="right"],
+.headerCell[data-align="right"] {
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .head .headerCell,
+  .cell {
+    padding: 0 10px;
+  }
+}

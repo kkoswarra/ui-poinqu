@@ -1,0 +1,30 @@
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  color: var(--color-text);
+}
+
+.status iconify-icon {
+  color: var(--color-info);
+  width: 14px;
+  height: 14px;
+}
+
+.status[data-tone="success"] iconify-icon {
+  color: var(--color-success);
+}
+
+.status[data-tone="danger"] iconify-icon {
+  color: var(--color-danger);
+}
+
+.status[data-tone="warning"] iconify-icon {
+  color: var(--color-warning);
+}
+
+.status[data-tone="yellow"] iconify-icon {
+  color: var(--color-yellow);
+}

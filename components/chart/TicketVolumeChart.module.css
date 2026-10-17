@@ -1,0 +1,196 @@
+.chart {
+  background:
+    repeating-linear-gradient(120deg, transparent 0 8px, var(--color-stripe) 8px 9px),
+    var(--color-frame);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 3px;
+  height: 404px;
+}
+
+.heading {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+  color: var(--color-secondary);
+}
+
+.heading h2 {
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  margin: 0;
+  flex: 1;
+}
+
+.body {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+  height: 348px;
+  padding: 12px 14px;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.total {
+  line-height: 1.2;
+  font-size: var(--text-chart);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-heading);
+  font-variant-numeric: tabular-nums;
+  animation: valueIn var(--duration-normal) var(--ease-standard);
+}
+
+.comparison {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.comparison strong {
+  font-weight: var(--weight-regular);
+  color: var(--color-success);
+  margin-right: 6px;
+}
+
+.plot {
+  height: 216px;
+  margin-top: 42px;
+  margin-right: 36px;
+  position: relative;
+  background: repeating-linear-gradient(
+    to top,
+    var(--color-divider) 0 1px,
+    transparent 1px 54px
+  );
+}
+
+.bars {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.bar {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--color-surface) 50%, transparent);
+  border-radius: 8px 8px 2px 2px;
+  background: linear-gradient(var(--color-chart-bar), var(--color-chart-base));
+  height: var(--bar-height);
+  transform-origin: center bottom;
+  transition:
+    height var(--duration-data) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+  animation: barIn var(--duration-data) var(--ease-standard) backwards;
+  animation-delay: calc(var(--index) * var(--duration-stagger));
+}
+
+.bar:first-child,
+.bar:last-child {
+  flex: 0.45;
+  opacity: 0.5;
+}
+
+.bar[aria-pressed="true"] {
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  border-color: var(--color-accent);
+}
+
+.bar:hover {
+  opacity: 0.8;
+}
+
+.marker {
+  position: absolute;
+  top: 35%;
+  left: 35%;
+  right: 0;
+  border-top: 1px dashed var(--color-muted);
+  pointer-events: none;
+  transition:
+    top var(--duration-fast) var(--ease-standard),
+    left var(--duration-fast) var(--ease-standard);
+}
+
+.tooltip {
+  position: absolute;
+  right: 100%;
+  top: -12px;
+  color: var(--color-surface);
+  background: var(--color-accent);
+  border-radius: 5px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  padding: 4px 7px;
+  white-space: nowrap;
+}
+
+.axis {
+  position: absolute;
+  inset: -8px -36px -8px auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: right;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.days {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 36px 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+@keyframes barIn {
+  from {
+    transform: scaleY(0.65);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes valueIn {
+  from {
+    opacity: 0.35;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .bars {
+    gap: 6px;
+  }
+
+  .tooltip {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .total,
+  .bar {
+    animation: none;
+  }
+}

@@ -1,0 +1,116 @@
+.listGroup {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-divider);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.item:first-child {
+  border-radius: var(--radius-control) var(--radius-control) 0 0;
+}
+
+.item:last-child {
+  border-bottom: 0;
+  border-radius: 0 0 var(--radius-control) var(--radius-control);
+}
+
+.item:only-child {
+  border-radius: var(--radius-control);
+}
+
+.item:hover {
+  background: color-mix(in srgb, var(--color-sidebar) 55%, var(--color-surface));
+}
+
+.item[data-active] {
+  background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+  box-shadow: inset 2px 0 0 var(--color-accent);
+}
+
+.leading {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-frame);
+  color: var(--color-info);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.description {
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.meta {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .item {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px 10px;
+  }
+
+  .content {
+    flex: 1 1 calc(100% - 42px);
+  }
+
+  .meta {
+    order: 3;
+    margin-left: 42px;
+  }
+
+  .actions {
+    order: 4;
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 2px;
+  }
+}

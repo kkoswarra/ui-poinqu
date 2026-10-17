@@ -1,0 +1,65 @@
+.placeholder {
+  display: block;
+  flex-shrink: 0;
+  min-width: 0;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-divider) 25%,
+    color-mix(in srgb, var(--color-surface) 55%, var(--color-divider)) 37%,
+    var(--color-divider) 63%
+  );
+  background-size: 400% 100%;
+}
+
+.placeholder[data-variant="heading"] {
+  height: 16px;
+  width: 55%;
+  border-radius: 5px;
+}
+
+.placeholder[data-variant="text"] {
+  height: 10px;
+  width: 100%;
+}
+
+.placeholder[data-variant="circle"] {
+  border-radius: 50%;
+}
+
+.placeholder[data-variant="rect"] {
+  height: 80px;
+  width: 100%;
+  border-radius: var(--radius-control);
+}
+
+.placeholder[data-animated] {
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.lines .placeholder[data-variant="text"] {
+  width: 100%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .placeholder[data-animated] {
+    animation: none;
+  }
+}

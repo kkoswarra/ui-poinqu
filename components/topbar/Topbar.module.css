@@ -1,0 +1,43 @@
+.topbar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-secondary);
+  font-size: var(--text-base);
+}
+
+.crumbs {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar button {
+  border: 0;
+  padding: 4px;
+  background: none;
+  display: grid;
+  place-items: center;
+  color: var(--color-secondary);
+}
+
+.topbar button,
+.topbar a {
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.topbar button:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar button,
+  .topbar a {
+    transform: none;
+  }
+}
