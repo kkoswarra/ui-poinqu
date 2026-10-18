@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import LoginPage from "@/components/auth/LoginPage";
 
 export const metadata: Metadata = {
-  title: "Sign in — Poinqu Admin",
-  description: "Sign in to the Poinqu support admin workspace.",
+  title: "Masuk — Poinqu Admin",
+  description: "Masuk ke konsol admin Poinqu.",
   robots: {
     index: false,
     follow: false,

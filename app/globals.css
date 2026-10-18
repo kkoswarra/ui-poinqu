@@ -1,11 +1,11 @@
 :root {
-  --color-canvas: #ffffff;
+  --color-canvas: #f2f4f7;
   --color-surface: #ffffff;
-  --color-sidebar: #f8f8f8;
-  --color-frame: #f6f6f6;
-  --color-stripe: #eeeeef;
-  --color-border: #e1e4ea;
-  --color-divider: #eeeeef;
+  --color-sidebar: #f8f9fb;
+  --color-frame: #f5f6f8;
+  --color-stripe: #edeff3;
+  --color-border: #e3e6eb;
+  --color-divider: #edf0f3;
   --color-text: #1f2937;
   --color-secondary: #4b5563;
   --color-muted: #6b7280;
@@ -43,6 +43,11 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+
+  /* Layout rhythm: one gap for page sections, one padding for card bodies. */
+  --page-gap: 12px;
+  --card-padding: 18px;
+  --card-padding-sm: 12px;
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-inner: 9px;

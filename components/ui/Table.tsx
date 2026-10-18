@@ -14,6 +14,8 @@ type TableProps = {
   caption?: string;
   minWidth?: number;
   className?: string;
+  /** Render edge-to-edge inside a Card body: no own border, radius or background. */
+  flush?: boolean;
 };
 
 export default function Table({
@@ -22,9 +24,10 @@ export default function Table({
   caption,
   minWidth = 720,
   className,
+  flush = false,
 }: TableProps) {
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} data-flush={flush ? "" : undefined}>
       <table
         className={[styles.table, className].filter(Boolean).join(" ")}
         style={{ minWidth }}

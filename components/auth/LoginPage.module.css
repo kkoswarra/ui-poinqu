@@ -484,3 +484,71 @@
     animation: none;
   }
 }
+
+.stepNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-frame);
+  color: var(--color-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.stepNote iconify-icon {
+  color: var(--color-info);
+  margin-top: 1px;
+}
+
+.secretBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.secretBox > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.secretBox span {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.secretBox code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--color-text);
+}
+
+.secretHint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.secretHint a {
+  color: var(--color-info);
+}
+
+.backRow {
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.formError {
+  margin-bottom: 18px;
+}

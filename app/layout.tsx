@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Poinqu — Support Dashboard",
+  title: "Poinqu Admin",
   description:
-    "Poinqu support workspace overview: ticket volume, SLA monitoring and team activity.",
+    "Poinqu wallet administration: users, recovery requests, admins, settings and audit logs.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

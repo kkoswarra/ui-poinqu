@@ -1,5 +1,5 @@
-import ComponentShowcase from "@/components/showcase/ComponentShowcase";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <ComponentShowcase />;
+  redirect("/dashboard");
 }

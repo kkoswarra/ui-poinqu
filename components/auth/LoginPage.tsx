@@ -2,95 +2,188 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
-import Checkbox from "@/components/ui/Checkbox";
 import FormField from "@/components/ui/FormField";
 import Icon from "@/components/ui/Icon";
 import Input from "@/components/ui/Input";
-import Modal from "@/components/ui/Modal";
 import PasswordInput from "@/components/ui/PasswordInput";
-import { useToast } from "@/components/ui/Toast";
+import { ApiError, adminApi } from "@/lib/admin-api";
+import { getAccessToken, saveSession } from "@/lib/admin-session";
+import type { AdminAuthResult, LoginStep } from "@/lib/admin-types";
 import styles from "./LoginPage.module.css";
 
-const isEmail = (value: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+type Step = "credentials" | "password" | "setup" | "verify";
+
+const STEP_COPY: Record<Step, { title: string; description: string }> = {
+  credentials: {
+    title: "Masuk ke admin",
+    description: "Gunakan email dan password akun admin Poinqu.",
+  },
+  password: {
+    title: "Ganti password",
+    description: "Password sementara wajib diganti sebelum melanjutkan.",
+  },
+  setup: {
+    title: "Aktifkan 2FA",
+    description: "Simpan secret ini di aplikasi authenticator, lalu masukkan kodenya.",
+  },
+  verify: {
+    title: "Verifikasi 2FA",
+    description: "Masukkan 6 digit kode dari aplikasi authenticator.",
+  },
+};
+
+function describeError(error: unknown): string {
+  if (error instanceof ApiError) {
+    const field = error.errors?.[0];
+    return field ? `${error.message} ${field.message}` : error.message;
+  }
+  return "Terjadi kesalahan. Coba lagi.";
+}
 
 export default function LoginPage() {
   const router = useRouter();
-  const { toast } = useToast();
-
+  const [step, setStep] = useState<Step>("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(true);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const [code, setCode] = useState("");
+  const [challenge, setChallenge] = useState("");
+  const [secret, setSecret] = useState("");
+  const [otpauth, setOtpauth] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const [resetOpen, setResetOpen] = useState(false);
-  const [resetEmail, setResetEmail] = useState("");
-  const [resetError, setResetError] = useState<string | null>(null);
-
-  const timer = useRef<number | undefined>(undefined);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    return () => {
-      if (timer.current !== undefined) window.clearTimeout(timer.current);
-    };
-  }, []);
+    if (getAccessToken()) {
+      router.replace("/dashboard");
+    }
+  }, [router]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (loading) return;
+  const finish = (result: AdminAuthResult) => {
+    saveSession(result.admin, result.tokens);
+    router.replace("/dashboard");
+  };
 
-    if (!isEmail(email)) {
-      setError("Masukkan alamat email yang valid.");
+  const continueStep = async (nextStep: LoginStep, token: string) => {
+    setChallenge(token);
+    if (nextStep === "CHANGE_PASSWORD") {
+      setStep("password");
       return;
     }
+    if (nextStep === "SETUP_2FA") {
+      const setup = await adminApi.setupTwoFactor(token);
+      setSecret(setup.secret);
+      setOtpauth(setup.otpauth_uri);
+      setStep("setup");
+      return;
+    }
+    setStep("verify");
+  };
 
-    if (password.length < 6) {
-      setError("Password minimal 6 karakter.");
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    if (!email.trim()) {
+      setError("Email wajib diisi.");
+      return;
+    }
+    if (!password) {
+      setError("Password wajib diisi.");
       return;
     }
 
     setError(null);
     setLoading(true);
-    timer.current = window.setTimeout(() => {
+    try {
+      const result = await adminApi.login(email.trim(), password);
+      await continueStep(result.next_step, result.challenge_token);
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
       setLoading(false);
-      toast({
-        title: "Welcome back",
-        description: "You are signed in to the Poinqu admin demo.",
-        tone: "success",
-      });
-      router.push("/dashboard");
-    }, 1100);
+    }
   };
 
-  const openReset = () => {
-    setResetEmail(email);
-    setResetError(null);
-    setResetOpen(true);
-  };
-
-  const handleReset = () => {
-    if (!isEmail(resetEmail)) {
-      setResetError("Masukkan alamat email yang valid.");
+  const handleChangePassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    if (newPassword.length < 12) {
+      setError("Password baru minimal 12 karakter.");
+      return;
+    }
+    if (newPassword !== confirmation) {
+      setError("Konfirmasi password tidak sama.");
       return;
     }
 
-    setResetOpen(false);
-    toast({
-      title: "Reset link sent",
-      description: `We sent a reset link to ${resetEmail.trim()}.`,
-      tone: "success",
-    });
+    setError(null);
+    setLoading(true);
+    try {
+      const result = await adminApi.changePassword(
+        challenge,
+        password,
+        newPassword,
+      );
+      setPassword(newPassword);
+      await continueStep(result.next_step, result.challenge_token);
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fillDemo = () => {
-    setEmail("admin@poinqu.com");
-    setPassword("demo1234");
+  const handleCode = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    if (!/^\d{6}$/.test(code)) {
+      setError("Kode 2FA harus 6 digit.");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
+    try {
+      const result =
+        step === "setup"
+          ? await adminApi.enableTwoFactor(challenge, code)
+          : await adminApi.verifyTwoFactor(challenge, code);
+      finish(result);
+    } catch (err) {
+      setError(describeError(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copySecret = async () => {
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const back = () => {
+    setStep("credentials");
+    setPassword("");
+    setNewPassword("");
+    setConfirmation("");
+    setCode("");
+    setChallenge("");
+    setSecret("");
+    setOtpauth("");
     setError(null);
   };
+
+  const copy = STEP_COPY[step];
 
   return (
     <div className={styles.page}>
@@ -109,11 +202,11 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.brandContent}>
-          <p className={styles.eyebrow}>Support operations</p>
-          <h1>Run your support operation with confidence.</h1>
+          <p className={styles.eyebrow}>Wallet operations</p>
+          <h1>Kelola dompet digital dari satu konsol.</h1>
           <p className={styles.brandText}>
-            One workspace for tickets, SLAs, agents, and the insights that keep
-            your customers happy.
+            Verifikasi pengguna, tinjau pemulihan nomor, atur batas, dan audit
+            setiap aksi admin.
           </p>
 
           <ul className={styles.featureList}>
@@ -121,33 +214,33 @@ export default function LoginPage() {
               <span className={styles.featureIcon}>
                 <Icon name="lucide:check" />
               </span>
-              Real-time SLA monitoring and breach alerts
+              Pengawasan pengguna dan status KYC
             </li>
             <li>
               <span className={styles.featureIcon}>
                 <Icon name="lucide:check" />
               </span>
-              Team workload, routing, and shift schedules
+              Antrean pemulihan nomor dengan maker-checker
             </li>
             <li>
               <span className={styles.featureIcon}>
                 <Icon name="lucide:check" />
               </span>
-              Audit-ready reporting for every conversation
+              Pengaturan berversi dan audit log
             </li>
           </ul>
         </div>
 
         <figure className={styles.quoteCard}>
           <blockquote>
-            “Poinqu keeps our first response time under two hours, even during
-            peak season.”
+            “Setiap perubahan sensitif tercatat, dari batas saldo sampai
+            keputusan pemulihan.”
           </blockquote>
           <figcaption>
-            <span className={styles.quoteAvatar}>SL</span>
+            <span className={styles.quoteAvatar}>PQ</span>
             <span>
-              <strong>Sarah Lee</strong>
-              <small>Support Lead · Northwind</small>
+              <strong>Poinqu Security</strong>
+              <small>Admin access policy</small>
             </span>
           </figcaption>
         </figure>
@@ -174,157 +267,196 @@ export default function LoginPage() {
               <Icon name="lucide:shield-check" />
               Admin console
             </span>
-            <h1>Welcome back</h1>
-            <p>Sign in to your Poinqu admin workspace.</p>
+            <h1>{copy.title}</h1>
+            <p>{copy.description}</p>
           </div>
 
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
-            {error ? (
+          {error ? (
+            <div className={styles.formError}>
               <Alert
                 tone="danger"
-                title="Unable to sign in"
+                title="Tidak dapat memproses"
                 description={error}
               />
-            ) : null}
+            </div>
+          ) : null}
 
-            <FormField label="Email address" required>
-              <Input
-                type="email"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="you@company.com"
-                icon="lucide:mail"
-                autoComplete="email"
+          {step === "credentials" ? (
+            <form className={styles.form} onSubmit={handleLogin} noValidate>
+              <FormField label="Email address" required>
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="owner@poinqu.id"
+                  icon="lucide:mail"
+                  autoComplete="email"
+                  fullWidth
+                />
+              </FormField>
+
+              <FormField label="Password" required>
+                <PasswordInput
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="Masukkan password admin"
+                  icon="lucide:lock"
+                  autoComplete="current-password"
+                  fullWidth
+                />
+              </FormField>
+
+              <Button
+                type="submit"
+                label={loading ? "Memeriksa…" : "Masuk"}
+                loading={loading}
+                variant="solid"
+                tone="primary"
+                icon="lucide:log-in"
+                iconRight={loading ? undefined : "lucide:arrow-right"}
                 fullWidth
               />
-            </FormField>
+            </form>
+          ) : null}
 
-            <FormField label="Password" required>
-              <PasswordInput
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                  if (error) setError(null);
-                }}
-                placeholder="Enter your password"
-                icon="lucide:lock"
-                autoComplete="current-password"
+          {step === "password" ? (
+            <form
+              className={styles.form}
+              onSubmit={handleChangePassword}
+              noValidate
+            >
+              <div className={styles.stepNote}>
+                <Icon name="lucide:info" />
+                <span>
+                  Password lama: password sementara dari pembuatan akun admin.
+                </span>
+              </div>
+
+              <FormField label="Password baru" required hint="Minimal 12 karakter.">
+                <PasswordInput
+                  value={newPassword}
+                  onChange={(event) => {
+                    setNewPassword(event.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="Password baru"
+                  icon="lucide:key-round"
+                  autoComplete="new-password"
+                  fullWidth
+                />
+              </FormField>
+
+              <FormField label="Konfirmasi password" required>
+                <PasswordInput
+                  value={confirmation}
+                  onChange={(event) => {
+                    setConfirmation(event.target.value);
+                    if (error) setError(null);
+                  }}
+                  placeholder="Ulangi password baru"
+                  icon="lucide:key-round"
+                  autoComplete="new-password"
+                  fullWidth
+                />
+              </FormField>
+
+              <Button
+                type="submit"
+                label={loading ? "Menyimpan…" : "Ganti password"}
+                loading={loading}
+                variant="solid"
+                tone="primary"
+                icon="lucide:save"
                 fullWidth
               />
-            </FormField>
 
-            <div className={styles.formRow}>
-              <Checkbox
-                label="Remember me for 30 days"
-                checked={remember}
-                onChange={(event) => setRemember(event.target.checked)}
-              />
-              <button
-                type="button"
-                className={styles.textButton}
-                onClick={openReset}
-              >
-                Forgot password?
-              </button>
-            </div>
-
-            <Button
-              type="submit"
-              label={loading ? "Signing in…" : "Sign in"}
-              loading={loading}
-              variant="solid"
-              tone="primary"
-              icon="lucide:log-in"
-              iconRight={loading ? undefined : "lucide:arrow-right"}
-              fullWidth
-            />
-
-            <div className={styles.divider}>
-              <span>or continue with</span>
-            </div>
-
-            <Button
-              label="Continue with SSO"
-              icon="lucide:building-2"
-              fullWidth
-              onClick={() =>
-                toast({
-                  title: "SSO is not configured",
-                  description:
-                    "Connect your identity provider to enable single sign-on.",
-                  tone: "info",
-                })
-              }
-            />
-
-            <div className={styles.demoHint}>
-              <Icon name="lucide:info" />
-              <p>
-                Demo mode: any valid email and password (6+ characters) works.{" "}
-                <button
-                  type="button"
-                  className={styles.inlineButton}
-                  onClick={fillDemo}
-                >
-                  Use demo account
+              <div className={styles.backRow}>
+                <button type="button" className={styles.textButton} onClick={back}>
+                  Kembali ke login
                 </button>
-              </p>
-            </div>
-          </form>
+              </div>
+            </form>
+          ) : null}
+
+          {step === "setup" || step === "verify" ? (
+            <form className={styles.form} onSubmit={handleCode} noValidate>
+              {step === "setup" ? (
+                <>
+                  <div className={styles.secretBox}>
+                    <div>
+                      <span>Secret TOTP</span>
+                      <code>{secret}</code>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.textButton}
+                      onClick={copySecret}
+                    >
+                      {copied ? "Tersalin" : "Salin"}
+                    </button>
+                  </div>
+                  <p className={styles.secretHint}>
+                    Tambahkan ke Google Authenticator/Authy, atau buka tautan{" "}
+                    <a href={otpauth} target="_blank" rel="noreferrer">
+                      otpauth
+                    </a>
+                    .
+                  </p>
+                </>
+              ) : null}
+
+              <FormField label="Kode 6 digit" required>
+                <Input
+                  value={code}
+                  onChange={(event) => {
+                    setCode(event.target.value.replace(/\D/g, "").slice(0, 6));
+                    if (error) setError(null);
+                  }}
+                  placeholder="123456"
+                  icon="lucide:hash"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  fullWidth
+                />
+              </FormField>
+
+              <Button
+                type="submit"
+                label={
+                  loading
+                    ? "Memverifikasi…"
+                    : step === "setup"
+                      ? "Aktifkan 2FA"
+                      : "Verifikasi & masuk"
+                }
+                loading={loading}
+                variant="solid"
+                tone="primary"
+                icon="lucide:shield-check"
+                fullWidth
+              />
+
+              <div className={styles.backRow}>
+                <button type="button" className={styles.textButton} onClick={back}>
+                  Kembali ke login
+                </button>
+              </div>
+            </form>
+          ) : null}
 
           <div className={styles.formFooter}>
             <span>© 2026 Poinqu</span>
-            <span>Privacy · Terms · Status</span>
+            <span>Admin access only</span>
           </div>
         </div>
       </main>
-
-      <Modal
-        open={resetOpen}
-        onClose={() => setResetOpen(false)}
-        title="Reset password"
-        description="Enter your admin email and we'll send a reset link."
-        icon="lucide:key-round"
-        tone="info"
-        size="sm"
-        footer={
-          <>
-            <Button
-              label="Cancel"
-              variant="ghost"
-              onClick={() => setResetOpen(false)}
-            />
-            <Button
-              label="Send reset link"
-              variant="solid"
-              tone="primary"
-              icon="lucide:send"
-              onClick={handleReset}
-            />
-          </>
-        }
-      >
-        <FormField
-          label="Email address"
-          error={resetError ?? undefined}
-        >
-          <Input
-            type="email"
-            value={resetEmail}
-            onChange={(event) => {
-              setResetEmail(event.target.value);
-              setResetError(null);
-            }}
-            placeholder="you@company.com"
-            icon="lucide:mail"
-            autoComplete="email"
-            fullWidth
-          />
-        </FormField>
-      </Modal>
     </div>
   );
 }

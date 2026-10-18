@@ -5,6 +5,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   min-width: 0;
+  overflow: hidden;
   transition:
     border-color var(--duration-normal) var(--ease-standard),
     box-shadow var(--duration-normal) var(--ease-standard),
@@ -34,16 +35,16 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 18px 20px 15px;
-  border-bottom: 1px dashed var(--color-border);
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .headerIcon {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-control);
   background: var(--color-surface);
@@ -79,11 +80,11 @@
 
 .body {
   flex: 1;
-  padding: 20px;
+  padding: var(--card-padding);
 }
 
 .body[data-padding="sm"] {
-  padding: 14px;
+  padding: var(--card-padding-sm);
 }
 
 .body[data-padding="none"] {
@@ -94,8 +95,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--color-border);
+  padding: 12px 18px;
+  border-top: 1px solid var(--color-divider);
   background: color-mix(in srgb, var(--color-sidebar) 55%, var(--color-surface));
   border-radius: 0 0 var(--radius-card) var(--radius-card);
 }
@@ -114,15 +115,15 @@
 
 @media (max-width: 760px) {
   .header {
-    padding: 16px 16px 13px;
+    padding: 14px 14px 11px;
   }
 
   .body {
-    padding: 16px;
+    padding: 14px;
   }
 
   .footer {
-    padding: 12px 16px;
+    padding: 10px 14px;
   }
 }
 

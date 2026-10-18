@@ -1,12 +1,21 @@
 # Poinqu Admin Panel
 
-Template dashboard admin Poinqu yang di-port dari [`docs/admin-template.html`](docs/admin-template.html) ke Next.js App Router, React, dan TypeScript. Styling memakai CSS Modules dengan token desain dari template asli.
+Konsol admin **Poinqu** berbasis Next.js App Router, React, dan TypeScript.
+Semua data operasional diambil dari API admin FastAPI
+(`poinqu-backend`), bukan lagi data statis.
 
-Saat ini tersedia dua halaman:
+## Halaman
 
-- `/` — showcase UI kit (Card, Alert, Badge, Button, Button Group, Form Controls, Placeholder, Spinner, Breadcrumb, Tabs, Collapse, Stepper, Pagination, List Group, Accordion, Table, Data Table, Modal, Toast, Dropdown, Tooltip).
-- `/dashboard` — dashboard Poinqu dari template asli.
-- `/login` — halaman login admin Poinqu (demo, redirect ke dashboard).
+| Route | Fungsi | Izin |
+|---|---|---|
+| `/login` | Login password + TOTP 2FA, ganti password, aktivasi 2FA | publik |
+| `/dashboard` | Ringkasan admin, status API, audit terbaru, antrean pemulihan | — |
+| `/dashboard/users` | Cari pengguna (nama/nomor), filter status & level | `users.read` |
+| `/dashboard/recovery` | Antrean pemulihan nomor + keputusan approve/reject | `recovery.review` |
+| `/dashboard/admins` | Daftar, buat, ubah peran/status admin | `admin.read` / `admin.write` |
+| `/dashboard/roles` | Peran dan daftar izin | `admin.read` |
+| `/dashboard/settings` | Pengaturan berversi + edit dengan alasan | `settings.read` / `settings.write` |
+| `/dashboard/audit` | Audit log dengan filter dan detail before/after | `audit.read` |
 
 ## Menjalankan
 
@@ -15,136 +24,95 @@ npm install
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000).
+Buka http://localhost:3000.
+
+`NEXT_PUBLIC_API_BASE_URL` menentukan backend:
+
+```dotenv
+# .env.local
+NEXT_PUBLIC_API_BASE_URL=https://poinqu-backend.vercel.app
+# atau backend lokal:
+# NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+```
+
+Backend harus mengizinkan origin panel di `CORS_ORIGINS`
+(`http://localhost:3000` untuk dev).
 
 Perintah lain:
 
 ```bash
-npm run build   # build produksi
-npm run start   # jalankan hasil build
-npm run lint    # ESLint
+npm run build
+npm run start
+npm run lint
 npx tsc --noEmit
 ```
+
+## Alur login
+
+1. `POST /v1/admin/auth/login` dengan email + password → `challenge_token`
+   dan `next_step`.
+2. `next_step` menentukan langkah berikut:
+   - `CHANGE_PASSWORD` → form ganti password (wajib sebelum 2FA).
+   - `SETUP_2FA` → `POST /admin/auth/2fa/setup`, tampilkan secret/otpauth,
+     lalu `POST /admin/auth/2fa/enable` untuk mengaktifkan dan menerbitkan token.
+   - `VERIFY_2FA` → `POST /admin/auth/2fa/verify`.
+3. Access token disimpan di `localStorage`; refresh token dirotasi otomatis
+   lewat `POST /v1/admin/auth/token/refresh` saat menerima 401.
+4. Sesi tidak valid → `localStorage` dibersihkan dan diarahkan ke `/login`.
+
+## API yang dipakai
+
+| Endpoint | Dipakai di |
+|---|---|
+| `POST /v1/admin/auth/login` | Login |
+| `POST /v1/admin/auth/password/change` | Ganti password |
+| `POST /v1/admin/auth/2fa/setup` / `enable` / `verify` | 2FA |
+| `POST /v1/admin/auth/token/refresh` | Rotasi sesi |
+| `POST /v1/admin/auth/logout` | Sign out |
+| `GET /v1/admin/me` | Guard sesi + profil |
+| `GET/POST/PATCH /v1/admin/admins` | Kelola admin |
+| `GET /v1/admin/roles` | Peran & izin |
+| `GET /v1/admin/settings`, `PUT /v1/admin/settings/{key}` | Pengaturan |
+| `GET /v1/admin/users` | Pencarian pengguna |
+| `GET /v1/admin/recovery-requests`, `POST .../{id}/decision` | Pemulihan nomor |
+| `GET /v1/admin/audit-logs` | Audit log |
+| `GET /health` | Status API di ringkasan |
 
 ## Struktur
 
 ```
 app/
-  globals.css                 # token warna, tipografi, spacing, motion, reset
-  layout.tsx                  # font Inter, metadata, Iconify, ToastProvider
-  page.tsx                    # showcase UI kit
-  login/page.tsx              # halaman login admin
-  dashboard/page.tsx          # dashboard Poinqu
+  page.tsx                       # redirect ke /dashboard
+  login/page.tsx                 # halaman login
+  dashboard/layout.tsx           # shell admin + guard sesi
+  dashboard/page.tsx             # ringkasan
+  dashboard/users|recovery|admins|roles|settings|audit/page.tsx
 components/
-  auth/LoginPage.tsx          # form login, validasi, reset password, SSO demo
-  dashboard/Dashboard.tsx     # state dashboard: sidebar, range, dialog
-  showcase/                   # halaman demo komponen + layout showcase
-  sidebar/                    # navigasi yang bisa dikonfigurasi (dashboard & demo)
-  topbar/                     # breadcrumb + aksi topbar
-  metrics/                    # kartu metrik + sparkline
-  chart/                      # bar chart ticket volume
-  updates/                    # panel latest updates + activity
-  table/                      # tabel SLA: search, filter, sort, export
-  ui/
-    Card.tsx                  # Card + CardHeader / CardBody / CardFooter
-    Alert.tsx                 # info / success / warning / danger, dismissible
-    Badge.tsx                 # soft / solid / outline, dot, icon, size
-    Button.tsx                # outline / solid / ghost, tone, size, loading
-    ButtonGroup.tsx           # segmented control
-    AccountModal.tsx          # popup info akun dari sidebar footer
-    FormField.tsx             # label, hint, error, aria-describedby otomatis
-    Input.tsx                 # input + icon kiri/kanan, invalid, size
-    PasswordInput.tsx         # input password + toggle show/hide
-    Select.tsx                # native select yang di-style
-    Textarea.tsx              # textarea + invalid state
-    Checkbox.tsx              # checkbox + description + indeterminate
-    RadioGroup.tsx            # radio group vertical / horizontal
-    Switch.tsx                # toggle switch + description
-    Placeholder.tsx           # skeleton text / heading / circle / rect
-    Spinner.tsx               # loading indicator, size + tone
-    Breadcrumb.tsx            # breadcrumb, dipakai langsung oleh Topbar
-    Tabs.tsx                  # Tabs / TabsList / Tab / TabPanel
-    Collapse.tsx              # disclosure dengan animasi native details
-    Stepper.tsx               # progress langkah horizontal / vertical
-    Pagination.tsx            # page numbers, ellipsis, prev/next, mobile summary
-    ListGroup.tsx             # ListGroup + ListGroupItem responsif
-    Accordion.tsx             # single / multiple open, berbasis Collapse
-    Table.tsx                 # Table + TableHead / TableBody / TableRow / cell
-    DataTable.tsx             # search, sort, selection, pagination, empty state
-    Modal.tsx                 # dialog center / sheet / fullscreen
-    Toast.tsx                 # ToastProvider + useToast()
-    Dropdown.tsx              # menu dengan keyboard navigation
-    Tooltip.tsx               # tooltip hover/focus, 4 placement
-    Icon.tsx                  # wrapper <iconify-icon>
-    SearchField.tsx
-    RangeSelect.tsx
-    StatusBadge.tsx
-    Avatar.tsx
-lib/data.ts                   # data statis & tipe dashboard
-types/iconify.d.ts            # deklarasi JSX untuk <iconify-icon>
-docs/admin-template.html      # template HTML referensi
+  admin/
+    AdminSessionProvider.tsx     # profil, izin, sign out, event 401
+    AdminShell.tsx               # sidebar, topbar, account modal
+    *Page.tsx                    # halaman admin
+    PageHeader.tsx, CursorPager.tsx
+  auth/LoginPage.tsx             # login + 2FA + ganti password
+  ui/                            # UI kit (Button, Card, Table, Modal, Toast, ...)
+lib/
+  admin-api.ts                   # fetch, envelope, refresh token, ApiError
+  admin-session.ts               # localStorage token/profil
+  admin-types.ts                 # tipe kontrak API admin
+  format.ts                      # tanggal, rupiah, JSON
 ```
-
-## Menggunakan komponen
-
-```tsx
-"use client";
-
-import { useState } from "react";
-import Button from "@/components/ui/Button";
-import Card, { CardBody, CardFooter, CardHeader } from "@/components/ui/Card";
-import FormField from "@/components/ui/FormField";
-import Input from "@/components/ui/Input";
-import Modal from "@/components/ui/Modal";
-import { useToast } from "@/components/ui/Toast";
-
-export default function Example() {
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
-
-  return (
-    <>
-      <Card>
-        <CardHeader title="Support plan" description="Your current subscription" />
-        <CardBody>...</CardBody>
-        <CardFooter align="between">
-          <Button
-            label="Save changes"
-            variant="solid"
-            tone="primary"
-            onClick={() => {
-              toast({ title: "Changes saved", tone: "success" });
-              setOpen(true);
-            }}
-          />
-        </CardFooter>
-      </Card>
-
-      <FormField label="Email address" hint="We only use this for alerts." required>
-        <Input type="email" icon="lucide:mail" placeholder="you@company.com" />
-      </FormField>
-
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Workspace settings"
-        description="Update the defaults for your support workspace."
-        footer={<Button label="Done" onClick={() => setOpen(false)} />}
-      >
-        ...
-      </Modal>
-    </>
-  );
-}
-```
-
-`FormField` otomatis menghubungkan label, hint/error, `aria-describedby`, dan `aria-invalid` ke control di dalamnya. `Modal` memakai native `<dialog>` sehingga mendukung fokus terkurung, Escape, dan klik backdrop.
 
 ## Catatan
 
-- Data dashboard masih statis dan terpusat di `lib/data.ts`, sehingga mudah diganti dengan API nanti.
-- Sidebar dashboard dan showcase memakai komponen `Sidebar` yang sama; isi navigasi, brand, search, dan profil kini dikirim lewat props.
-- Navigasi sidebar punya area scroll sendiri. Footer akun tetap di bawah sidebar; klik footer membuka `AccountModal` dengan info user, role, workspace, dan status.
-- Halaman `/login` adalah template demo: validasi email/password, show/hide password, remember me, reset password modal, SSO demo, dan redirect ke `/dashboard`. Sign out membawa kembali ke `/login`. Tidak ada autentikasi backend pada tahap ini.
-- Ikon memakai web component [Iconify](https://iconify.design/) yang dimuat dari CDN melalui `next/script`.
-- `next.config.ts` tidak memakai loader `@tailwindcss/turbopack` karena styling memakai CSS Modules; aturan loader tersebut membuat CSS Modules tidak ter-scope dengan benar.
+- Token admin disimpan di `localStorage`. Untuk hardening produksi,
+  pertimbangkan cookie `HttpOnly` lewat route handler/proxy Next.js.
+- `NEXT_PUBLIC_API_BASE_URL` ikut ter-bundle ke browser; jangan isi secret.
+- Panel ini memakai izin dari `/v1/admin/me`; menu yang tidak diizinkan
+  disembunyikan dan API tetap menolak akses langsung.
+- Edit pengaturan memakai optimistic concurrency (`version`) dan menyimpan
+  alasan; konflik versi ditampilkan dan data dimuat ulang.
+- Aksi tulis (buat/ubah admin, keputusan pemulihan, ubah setting) belum
+  dijalankan pada data produksi saat pengembangan; endpoint-nya sudah
+  terhubung dan tipe responsnya sesuai backend.
+- Halaman lama (showcase/support dashboard) masih ada di repo tetapi tidak
+  lagi dipakai oleh route aktif.
