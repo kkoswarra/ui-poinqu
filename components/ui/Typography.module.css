@@ -1,0 +1,139 @@
+.typography {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.typography[data-variant="display"] {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -1.4px;
+  line-height: 1.1;
+}
+
+.typography[data-variant="h1"] {
+  font-size: 32px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+}
+
+.typography[data-variant="h2"] {
+  font-size: 24px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.5px;
+  line-height: 1.25;
+}
+
+.typography[data-variant="h3"] {
+  font-size: 19px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: -0.2px;
+  line-height: 1.35;
+}
+
+.typography[data-variant="h4"] {
+  font-size: 15px;
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+}
+
+.typography[data-variant="lead"] {
+  color: var(--color-secondary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.typography[data-variant="body"] {
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+.typography[data-variant="small"] {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.typography[data-variant="muted"] {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.typography[data-variant="label"] {
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.typography[data-variant="code"] {
+  padding: 2px 5px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background: var(--color-sidebar);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.typography[data-variant="quote"] {
+  padding-left: 14px;
+  border-left: 3px solid var(--color-border);
+  color: var(--color-secondary);
+  font-size: var(--text-base);
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.typography[data-tone="secondary"] {
+  color: var(--color-secondary);
+}
+
+.typography[data-tone="muted"] {
+  color: var(--color-muted);
+}
+
+.typography[data-tone="info"] {
+  color: var(--color-info);
+}
+
+.typography[data-tone="success"] {
+  color: var(--color-success);
+}
+
+.typography[data-tone="warning"] {
+  color: var(--color-warning);
+}
+
+.typography[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.typography[data-weight="regular"] {
+  font-weight: var(--weight-regular);
+}
+
+.typography[data-weight="medium"] {
+  font-weight: var(--weight-medium);
+}
+
+.typography[data-weight="semibold"] {
+  font-weight: var(--weight-semibold);
+}
+
+.typography[data-align="center"] {
+  text-align: center;
+}
+
+.typography[data-align="right"] {
+  text-align: right;
+}
+
+.typography[data-truncate] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

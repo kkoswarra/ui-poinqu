@@ -1,0 +1,259 @@
+.attachment {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-inner);
+  background: var(--color-surface);
+  transition:
+    border-color var(--duration-fast) var(--ease-standard),
+    background-color var(--duration-fast) var(--ease-standard);
+}
+
+.attachment:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 22%, var(--color-border));
+}
+
+.attachment[data-orientation="vertical"] {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.attachment[data-size="sm"] {
+  gap: 8px;
+  padding: 8px;
+}
+
+.attachment[data-size="xs"] {
+  gap: 7px;
+  padding: 6px 8px;
+}
+
+.attachment[data-state="error"] {
+  border-color: color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+}
+
+.trigger {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+
+.media {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-control);
+  background: var(--color-frame);
+  color: var(--color-info);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media > iconify-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
+
+.attachment[data-size="sm"] .media {
+  width: 30px;
+  height: 30px;
+}
+
+.attachment[data-size="sm"] .media > iconify-icon {
+  width: 15px;
+  height: 15px;
+  font-size: 15px;
+}
+
+.attachment[data-size="xs"] .media {
+  width: 24px;
+  height: 24px;
+}
+
+.attachment[data-size="xs"] .media > iconify-icon {
+  width: 13px;
+  height: 13px;
+  font-size: 13px;
+}
+
+.attachment[data-orientation="vertical"] .media {
+  width: 100%;
+  height: 96px;
+}
+
+.attachment[data-state="error"] .media {
+  border-color: color-mix(in srgb, var(--color-danger) 20%, var(--color-divider));
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-surface));
+  color: var(--color-danger);
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.attachment[data-size="xs"] .title {
+  font-size: 11px;
+}
+
+.description {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment[data-state="error"] .description {
+  color: var(--color-danger);
+}
+
+.attachment[data-state="uploading"] .title,
+.attachment[data-state="processing"] .title {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-text) 50%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: attachment-shimmer 1.6s linear infinite;
+}
+
+.progress {
+  display: block;
+  height: 3px;
+  margin-top: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-divider);
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(var(--color-accent-top), var(--color-accent));
+  transition: width var(--duration-data) var(--ease-standard);
+}
+
+.actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  margin-left: auto;
+}
+
+.attachment[data-orientation="vertical"] .actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.action {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
+}
+
+.action:hover {
+  background: var(--color-sidebar);
+  color: var(--color-text);
+}
+
+.action > iconify-icon {
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+}
+
+.errorIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-danger);
+}
+
+.group {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x proximity;
+}
+
+.group > * {
+  flex: 0 0 min(220px, 78vw);
+  scroll-snap-align: start;
+}
+
+@keyframes attachment-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attachment[data-state="uploading"] .title,
+  .attachment[data-state="processing"] .title {
+    background: none;
+    color: var(--color-text);
+    animation: none;
+  }
+
+  .progress span,
+  .action {
+    transition: none;
+  }
+}

@@ -5,6 +5,7 @@ import {
   isValidElement,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactElement,
@@ -39,6 +40,8 @@ export default function Tooltip({
   const timer = useRef<number | undefined>(undefined);
   const hovered = useRef(false);
   const focused = useRef(false);
+  const wrapperRef = useRef<HTMLSpanElement>(null);
+  const tooltipRef = useRef<HTMLSpanElement>(null);
   const id = useId();
 
   const clearTimer = () => {
@@ -65,6 +68,52 @@ export default function Tooltip({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (!visible) return;
+
+    const trigger = wrapperRef.current?.getBoundingClientRect();
+    const tooltip = tooltipRef.current;
+    if (!trigger || !tooltip) return;
+
+    const rect = tooltip.getBoundingClientRect();
+    const gap = 8;
+    const margin = 8;
+    let top = 0;
+    let left = 0;
+
+    if (placement === "top") {
+      top = trigger.top - rect.height - gap;
+      left = trigger.left + trigger.width / 2 - rect.width / 2;
+    } else if (placement === "bottom") {
+      top = trigger.bottom + gap;
+      left = trigger.left + trigger.width / 2 - rect.width / 2;
+    } else if (placement === "left") {
+      top = trigger.top + trigger.height / 2 - rect.height / 2;
+      left = trigger.left - rect.width - gap;
+    } else {
+      top = trigger.top + trigger.height / 2 - rect.height / 2;
+      left = trigger.right + gap;
+    }
+
+    top = Math.max(margin, Math.min(top, window.innerHeight - rect.height - margin));
+    left = Math.max(margin, Math.min(left, window.innerWidth - rect.width - margin));
+
+    tooltip.style.top = `${top}px`;
+    tooltip.style.left = `${left}px`;
+  }, [content, placement, visible]);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    const hideOnMove = () => setVisible(false);
+    window.addEventListener("scroll", hideOnMove, true);
+    window.addEventListener("resize", hideOnMove);
+    return () => {
+      window.removeEventListener("scroll", hideOnMove, true);
+      window.removeEventListener("resize", hideOnMove);
+    };
+  }, [visible]);
+
   const child = isValidElement(children)
     ? (children as ReactElement<Record<string, unknown>>)
     : null;
@@ -80,6 +129,7 @@ export default function Tooltip({
 
   return (
     <span
+      ref={wrapperRef}
       className={[styles.wrapper, className].filter(Boolean).join(" ")}
       onMouseEnter={() => {
         hovered.current = true;
@@ -104,6 +154,7 @@ export default function Tooltip({
       {trigger}
       {visible ? (
         <span
+          ref={tooltipRef}
           role="tooltip"
           id={id}
           className={styles.tooltip}

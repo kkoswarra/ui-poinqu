@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import Button, { type ButtonTone, type ButtonVariant } from "./Button";
 import Icon from "./Icon";
 import styles from "./Dropdown.module.css";
@@ -34,6 +41,53 @@ type DropdownProps = {
   className?: string;
 };
 
+type MenuPosition = {
+  top?: number;
+  bottom?: number;
+  left?: number;
+  right?: number;
+  maxHeight: number;
+};
+
+function computeMenuPosition(
+  rect: DOMRect,
+  align: "start" | "end",
+  estimatedWidth: number,
+): MenuPosition {
+  const gap = 6;
+  const margin = 8;
+  const viewportHeight = window.innerHeight;
+  const spaceBelow = viewportHeight - rect.bottom - gap - margin;
+  const spaceAbove = rect.top - gap - margin;
+  const openAbove = spaceBelow < 200 && spaceAbove > spaceBelow;
+  const maxHeight = Math.min(320, Math.max(140, openAbove ? spaceAbove : spaceBelow));
+
+  if (align === "start") {
+    return {
+      top: openAbove ? undefined : rect.bottom + gap,
+      bottom: openAbove ? viewportHeight - rect.top + gap : undefined,
+      left: Math.max(
+        margin,
+        Math.min(rect.left, window.innerWidth - estimatedWidth - margin),
+      ),
+      maxHeight,
+    };
+  }
+
+  return {
+    top: openAbove ? undefined : rect.bottom + gap,
+    bottom: openAbove ? viewportHeight - rect.top + gap : undefined,
+    right: Math.max(
+      margin,
+      Math.min(
+        window.innerWidth - rect.right,
+        window.innerWidth - estimatedWidth - margin,
+      ),
+    ),
+    maxHeight,
+  };
+}
+
 export default function Dropdown({
   label,
   icon,
@@ -48,6 +102,7 @@ export default function Dropdown({
   className,
 }: DropdownProps) {
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<MenuPosition | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
@@ -56,13 +111,47 @@ export default function Dropdown({
     rootRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
   };
 
-  const focusItem = (position: "first" | "last") => {
+  const focusItem = (edge: "first" | "last") => {
     const menuItems = menuRef.current?.querySelectorAll<HTMLButtonElement>(
       '[role="menuitem"]:not(:disabled)',
     );
     if (!menuItems?.length) return;
-    menuItems[position === "first" ? 0 : menuItems.length - 1].focus();
+    menuItems[edge === "first" ? 0 : menuItems.length - 1].focus();
   };
+
+  const updatePosition = () => {
+    const rect = rootRef.current?.getBoundingClientRect();
+    if (rect) {
+      setPosition(
+        computeMenuPosition(rect, align, menuWidth ?? 190),
+      );
+    }
+  };
+
+  const openMenu = () => {
+    updatePosition();
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    const update = () => {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (rect) {
+        setPosition(
+          computeMenuPosition(rect, align, menuWidth ?? 190),
+        );
+      }
+    };
+
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [align, menuWidth, open]);
 
   useEffect(() => {
     const closeOnOutside = (event: MouseEvent) => {
@@ -120,7 +209,7 @@ export default function Dropdown({
         if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
         if (!open) {
           event.preventDefault();
-          setOpen(true);
+          openMenu();
           requestAnimationFrame(() =>
             focusItem(event.key === "ArrowDown" ? "first" : "last"),
           );
@@ -143,10 +232,13 @@ export default function Dropdown({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        onClick={() => setOpen((previous) => !previous)}
+        onClick={() => {
+          if (open) setOpen(false);
+          else openMenu();
+        }}
       />
 
-      {open ? (
+      {open && position ? (
         <div
           ref={menuRef}
           id={menuId}
@@ -154,7 +246,12 @@ export default function Dropdown({
           role="menu"
           aria-label={label}
           data-align={align}
-          style={menuWidth ? { minWidth: menuWidth } : undefined}
+          style={
+            {
+              ...(menuWidth ? { minWidth: menuWidth } : {}),
+              ...position,
+            } as CSSProperties
+          }
           onKeyDown={handleMenuKeyDown}
         >
           {items.map((entry, index) => {

@@ -65,6 +65,12 @@
   border-radius: 0;
 }
 
+.wrapper[data-flush] .head .headerCell,
+.wrapper[data-flush] .cell {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
 .cell {
   height: 44px;
   padding: 0 12px;
@@ -106,5 +112,11 @@
   .head .headerCell,
   .cell {
     padding: 0 10px;
+  }
+
+  .wrapper[data-flush] .head .headerCell,
+  .wrapper[data-flush] .cell {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }

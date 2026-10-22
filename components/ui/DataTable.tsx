@@ -39,6 +39,8 @@ type DataTableProps<T> = {
   pageSize?: number;
   selectable?: boolean;
   emptyMessage?: string;
+  /** Edge-to-edge table inside a Card: toolbar and footer keep their own padding. */
+  flush?: boolean;
 };
 
 export default function DataTable<T>({
@@ -52,6 +54,7 @@ export default function DataTable<T>({
   pageSize = 5,
   selectable = false,
   emptyMessage = "No records match your filters.",
+  flush = false,
 }: DataTableProps<T>) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -158,7 +161,7 @@ export default function DataTable<T>({
     : "No results";
 
   return (
-    <div className={styles.dataTable}>
+    <div className={styles.dataTable} data-flush={flush ? "" : undefined}>
       <div className={styles.toolbar}>
         {searchable ? (
           <div className={styles.search}>
@@ -190,7 +193,7 @@ export default function DataTable<T>({
       </div>
 
       {pageRows.length ? (
-        <Table ariaLabel={ariaLabel} minWidth={760}>
+        <Table ariaLabel={ariaLabel} minWidth={760} flush={flush}>
           <TableHead>
             <TableRow>
               {selectable ? (

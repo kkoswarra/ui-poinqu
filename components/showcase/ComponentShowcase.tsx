@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
 import {
   PRIORITY_META,
   STATUS_META,
@@ -15,6 +14,10 @@ import Topbar from "@/components/topbar/Topbar";
 import Accordion, { type AccordionItem } from "@/components/ui/Accordion";
 import AccountModal from "@/components/ui/AccountModal";
 import Alert from "@/components/ui/Alert";
+import AlertDialog from "@/components/ui/AlertDialog";
+import Attachment, {
+  type AttachmentState,
+} from "@/components/ui/Attachment";
 import Badge, { type BadgeTone } from "@/components/ui/Badge";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
@@ -22,12 +25,14 @@ import ButtonGroup from "@/components/ui/ButtonGroup";
 import Card, { CardBody, CardFooter, CardHeader } from "@/components/ui/Card";
 import Checkbox from "@/components/ui/Checkbox";
 import Collapse from "@/components/ui/Collapse";
+import Combobox, { type ComboboxOption } from "@/components/ui/Combobox";
 import DataTable, { type DataTableColumn } from "@/components/ui/DataTable";
 import Dropdown, { type DropdownEntry } from "@/components/ui/Dropdown";
 import FormField from "@/components/ui/FormField";
 import Icon from "@/components/ui/Icon";
 import Input from "@/components/ui/Input";
 import ListGroup, { ListGroupItem } from "@/components/ui/ListGroup";
+import Marker from "@/components/ui/Marker";
 import Modal, { type ModalTone } from "@/components/ui/Modal";
 import Pagination from "@/components/ui/Pagination";
 import Placeholder from "@/components/ui/Placeholder";
@@ -47,11 +52,19 @@ import Tabs, { Tab, TabPanel, TabsList } from "@/components/ui/Tabs";
 import Textarea from "@/components/ui/Textarea";
 import { useToast, type ToastTone } from "@/components/ui/Toast";
 import Tooltip from "@/components/ui/Tooltip";
+import Trace, { type TraceItem } from "@/components/ui/Trace";
+import Typography from "@/components/ui/Typography";
 import styles from "./ComponentShowcase.module.css";
 
 type SidebarMode = "default" | "closed" | "open";
 
 const NAV_SECTIONS: NavSection[] = [
+  {
+    caption: "Foundations",
+    entries: [
+      { kind: "link", label: "Typography", icon: "lucide:type" },
+    ],
+  },
   {
     caption: "Components",
     entries: [
@@ -61,6 +74,8 @@ const NAV_SECTIONS: NavSection[] = [
       { kind: "link", label: "Button", icon: "lucide:mouse-pointer-click" },
       { kind: "link", label: "Button Group", icon: "lucide:square-mouse-pointer" },
       { kind: "link", label: "Form Controls", icon: "lucide:text-cursor-input" },
+      { kind: "link", label: "Combobox", icon: "lucide:list-filter" },
+      { kind: "link", label: "Attachment", icon: "lucide:paperclip" },
       { kind: "link", label: "Placeholder", icon: "lucide:rectangle-ellipsis" },
       { kind: "link", label: "Spinner", icon: "lucide:loader-circle" },
     ],
@@ -78,6 +93,8 @@ const NAV_SECTIONS: NavSection[] = [
   {
     caption: "Data display",
     entries: [
+      { kind: "link", label: "Marker", icon: "lucide:map-pin" },
+      { kind: "link", label: "Trace", icon: "lucide:waypoints" },
       { kind: "link", label: "List Group", icon: "lucide:list" },
       { kind: "link", label: "Accordion", icon: "lucide:chevrons-up-down" },
       { kind: "link", label: "Table", icon: "lucide:table" },
@@ -88,17 +105,13 @@ const NAV_SECTIONS: NavSection[] = [
     caption: "Overlays & feedback",
     entries: [
       { kind: "link", label: "Modal", icon: "lucide:app-window" },
+      { kind: "link", label: "Alert Dialog", icon: "lucide:shield-alert" },
       { kind: "link", label: "Toast", icon: "lucide:bell-ring" },
       { kind: "link", label: "Dropdown", icon: "lucide:chevron-down" },
       { kind: "link", label: "Tooltip", icon: "lucide:message-square-text" },
     ],
   },
 ];
-
-const SUPPORT_NAV: NavSection = {
-  caption: "Workspace",
-  entries: [{ kind: "link", label: "Dashboard", icon: "lucide:layout-dashboard" }],
-};
 
 const BADGE_TONES: BadgeTone[] = [
   "neutral",
@@ -118,12 +131,15 @@ const ALIGNMENTS = [
 ];
 
 const SECTION_LABELS = [
+  "Typography",
   "Card",
   "Alert",
   "Badge",
   "Button",
   "Button Group",
   "Form Controls",
+  "Combobox",
+  "Attachment",
   "Placeholder",
   "Spinner",
   "Breadcrumb",
@@ -131,11 +147,14 @@ const SECTION_LABELS = [
   "Collapse",
   "Stepper",
   "Pagination",
+  "Marker",
+  "Trace",
   "List Group",
   "Accordion",
   "Table",
   "Data Table",
   "Modal",
+  "Alert Dialog",
   "Toast",
   "Dropdown",
   "Tooltip",
@@ -239,6 +258,187 @@ const DATA_COLUMNS: DataTableColumn<DemoRow>[] = [
   },
 ];
 
+const FRAMEWORK_OPTIONS: ComboboxOption[] = [
+  {
+    value: "next",
+    label: "Next.js",
+    description: "React framework",
+    icon: "lucide:atom",
+    group: "React",
+  },
+  {
+    value: "remix",
+    label: "Remix",
+    description: "Full-stack React",
+    icon: "lucide:route",
+    group: "React",
+  },
+  {
+    value: "astro",
+    label: "Astro",
+    description: "Content-first framework",
+    icon: "lucide:rocket",
+    group: "Other",
+  },
+  {
+    value: "sveltekit",
+    label: "SvelteKit",
+    description: "Svelte framework",
+    icon: "lucide:flame",
+    group: "Other",
+  },
+  {
+    value: "nuxt",
+    label: "Nuxt",
+    description: "Vue framework",
+    icon: "lucide:mountain",
+    group: "Vue",
+  },
+  {
+    value: "solid",
+    label: "SolidStart",
+    description: "Coming soon",
+    icon: "lucide:box",
+    group: "Other",
+    disabled: true,
+  },
+];
+
+const LABEL_OPTIONS: ComboboxOption[] = [
+  { value: "billing", label: "Billing", icon: "lucide:credit-card" },
+  { value: "bug", label: "Bug", icon: "lucide:bug" },
+  { value: "feature", label: "Feature request", icon: "lucide:sparkles" },
+  { value: "urgent", label: "Urgent", icon: "lucide:zap" },
+  { value: "design", label: "Design", icon: "lucide:palette" },
+  { value: "docs", label: "Documentation", icon: "lucide:book-open" },
+];
+
+const WORKSPACE_OPTIONS: ComboboxOption[] = [
+  {
+    value: "nuvio",
+    label: "Nuvio Support",
+    description: "24 agents",
+    icon: "lucide:headset",
+  },
+  {
+    value: "poinqu",
+    label: "Poinqu Billing",
+    description: "8 agents",
+    icon: "lucide:credit-card",
+  },
+];
+
+const TEAM_OPTIONS: ComboboxOption[] = [
+  {
+    value: "support",
+    label: "Support",
+    description: "12 agents",
+    icon: "lucide:headset",
+  },
+  {
+    value: "billing",
+    label: "Billing",
+    description: "4 agents",
+    icon: "lucide:credit-card",
+  },
+  {
+    value: "platform",
+    label: "Platform",
+    description: "8 agents",
+    icon: "lucide:server",
+  },
+];
+
+const TRACE_ITEMS: TraceItem[] = [
+  {
+    id: "thought",
+    title: "Thought for 5s",
+    description: "Diagnosing the failing CI install",
+    icon: "lucide:brain",
+    status: "done",
+    defaultOpen: true,
+    detail: (
+      <p>
+        The lockfile is out of sync with package.json, so a frozen install
+        cannot resolve the new version.
+      </p>
+    ),
+  },
+  {
+    id: "version",
+    title: "Ran pnpm --version",
+    description: "9.12.0",
+    icon: "lucide:terminal",
+    status: "done",
+  },
+  {
+    id: "install",
+    title: "Failed to run pnpm install",
+    description: "Exit code 1",
+    icon: "lucide:package",
+    status: "error",
+    detail: (
+      <pre>{`ERR_PNPM_OUTDATED_LOCKFILE  Cannot install with "frozen-lockfile"
+package.json and pnpm-lock.yaml are out of sync`}</pre>
+    ),
+  },
+  {
+    id: "build",
+    title: "Running pnpm build",
+    description: "Compiling 24 routes",
+    icon: "lucide:hammer",
+    status: "running",
+  },
+  {
+    id: "test",
+    title: "Run pnpm test",
+    description: "Queued",
+    icon: "lucide:flask-conical",
+    status: "pending",
+  },
+];
+
+type DemoAttachment = {
+  id: string;
+  name: string;
+  meta: string;
+  icon: string;
+  state: AttachmentState;
+  progress?: number;
+};
+
+const INITIAL_ATTACHMENTS: DemoAttachment[] = [
+  {
+    id: "sales",
+    name: "sales-dashboard.pdf",
+    meta: "PDF · 2.4 MB",
+    icon: "lucide:file-text",
+    state: "done",
+  },
+  {
+    id: "design",
+    name: "design-system.zip",
+    meta: "ZIP · 12 MB",
+    icon: "lucide:file-archive",
+    state: "uploading",
+    progress: 64,
+  },
+  {
+    id: "research",
+    name: "market-research.pdf",
+    meta: "PDF · 8.1 MB",
+    icon: "lucide:file-search",
+    state: "processing",
+  },
+  {
+    id: "model",
+    name: "financial-model.xlsx",
+    meta: "XLSX · 1.1 MB",
+    icon: "lucide:file-spreadsheet",
+    state: "error",
+  },
+];
+
 type ModalKind = "basic" | "danger" | "form" | "sheet" | "fullscreen" | "success";
 
 const MODAL_META: Record<
@@ -308,12 +508,16 @@ function Section({
   tag,
   title,
   description,
+  bodyPadding = "md",
+  footer,
   children,
 }: {
   id: string;
   tag: string;
   title: string;
   description: string;
+  bodyPadding?: "none" | "sm" | "md";
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -329,21 +533,21 @@ function Section({
             </Badge>
           }
         />
-        <CardBody>{children}</CardBody>
+        <CardBody padding={bodyPadding}>{children}</CardBody>
       </Card>
+      {footer}
     </section>
   );
 }
 
 export default function ComponentShowcase() {
-  const router = useRouter();
   const { toast } = useToast();
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>("default");
   const [isMobile, setIsMobile] = useState(false);
   const [alertVisible, setAlertVisible] = useState(true);
   const [view, setView] = useState<"day" | "week" | "month">("week");
   const [alignment, setAlignment] = useState("left");
-  const [activeSection, setActiveSection] = useState("Card");
+  const [activeSection, setActiveSection] = useState("Typography");
   const [priority, setPriority] = useState("medium");
   const [satisfaction, setSatisfaction] = useState("yes");
   const [step, setStep] = useState(1);
@@ -351,6 +555,13 @@ export default function ComponentShowcase() {
   const [modal, setModal] = useState<ModalKind | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [framework, setFramework] = useState<string | null>("next");
+  const [labels, setLabels] = useState<string[]>(["billing", "urgent"]);
+  const [attachments, setAttachments] =
+    useState<DemoAttachment[]>(INITIAL_ATTACHMENTS);
+  const [alertDialog, setAlertDialog] = useState<"publish" | "delete" | null>(
+    null,
+  );
   const saveTimer = useRef<number | undefined>(undefined);
   const suppressSpy = useRef(0);
 
@@ -371,11 +582,6 @@ export default function ComponentShowcase() {
   };
 
   const navigate = (label: string) => {
-    if (label === "Dashboard") {
-      router.push("/dashboard");
-      return;
-    }
-
     const id = sectionId(label);
     suppressSpy.current = Date.now() + 1000;
     setActiveSection(label);
@@ -586,10 +792,9 @@ export default function ComponentShowcase() {
       <div className={styles.sidebarRegion} inert={!sidebarVisible}>
         <Sidebar
           sections={NAV_SECTIONS}
-          support={SUPPORT_NAV}
           brand={{ name: "Poinqu", mark: "P" }}
           searchable={false}
-          initialActive="Card"
+          initialActive="Typography"
           activeLabel={activeSection}
           expanded={sidebarVisible}
           user={USER}
@@ -603,10 +808,7 @@ export default function ComponentShowcase() {
         <Topbar
           expanded={sidebarVisible}
           onToggleSidebar={toggleSidebar}
-          breadcrumb={[
-            { label: "UI Kit", href: "/" },
-            { label: "Components" },
-          ]}
+          breadcrumb={[{ label: "UI Kit" }, { label: "Components" }]}
           onNotifications={() =>
             notify("info", "No new notifications", "You are all caught up.")
           }
@@ -630,17 +832,69 @@ export default function ComponentShowcase() {
             <Badge tone="success" dot>
               Ready to use
             </Badge>
-            <Button
-              label="Open dashboard"
-              icon="lucide:layout-dashboard"
-              iconRight="lucide:arrow-up-right"
-              size="sm"
-              onClick={() => router.push("/dashboard")}
-            />
           </div>
         </header>
 
         <div className={styles.sections}>
+          <Section
+            id="typography"
+            tag="Foundation"
+            title="Typography"
+            description="A consistent type scale for headings, body copy, labels, code, and quotes. Every variant uses the same tokens as the rest of the kit."
+          >
+            <div className={styles.typographyGrid}>
+              <div className={styles.typographyStack}>
+                <Typography variant="label">Display scale</Typography>
+                <Typography variant="display">Design with rhythm</Typography>
+                <Typography variant="h1">Heading one</Typography>
+                <Typography variant="h2">Heading two</Typography>
+                <Typography variant="h3">Heading three</Typography>
+                <Typography variant="h4">Heading four</Typography>
+              </div>
+
+              <div className={styles.typographyStack}>
+                <Typography variant="label">Text styles</Typography>
+                <Typography variant="lead">
+                  Lead paragraphs introduce a page or section with a little more
+                  presence.
+                </Typography>
+                <Typography variant="body">
+                  Body copy is the default. It is sized for comfortable reading in
+                  dense admin screens and pairs with the card and table rhythm.
+                </Typography>
+                <Typography variant="small">
+                  Small text for metadata and helper copy.
+                </Typography>
+                <Typography variant="muted">
+                  Muted text for secondary information.
+                </Typography>
+                <Typography variant="quote">
+                  Good design is as little design as possible.
+                </Typography>
+                <Typography variant="body">
+                  Run <Typography variant="code">npm run build</Typography> before
+                  shipping.
+                </Typography>
+                <div className={styles.row}>
+                  <Typography variant="small" tone="success">
+                    Success tone
+                  </Typography>
+                  <Typography variant="small" tone="warning">
+                    Warning tone
+                  </Typography>
+                  <Typography variant="small" tone="danger">
+                    Danger tone
+                  </Typography>
+                </div>
+              </div>
+            </div>
+            <p className={styles.hint}>
+              Gunakan <code>variant=&quot;label&quot;</code> untuk eyebrow dan{" "}
+              <code>variant=&quot;code&quot;</code> untuk inline code. Semua
+              variant bisa diberi tone tanpa mengubah ukuran.
+            </p>
+          </Section>
+
           <Section
             id="card"
             tag="Layout"
@@ -1141,6 +1395,126 @@ export default function ComponentShowcase() {
           </Section>
 
           <Section
+            id="combobox"
+            tag="Forms"
+            title="Combobox"
+            description="Autocomplete input with a filtered list, keyboard navigation, clear action, and optional multiple selection with chips."
+          >
+            <div className={styles.formGrid}>
+              <FormField
+                label="Framework"
+                hint="Single select with search, clear, and keyboard navigation."
+              >
+                <Combobox
+                  options={FRAMEWORK_OPTIONS}
+                  value={framework}
+                  onValueChange={(next) =>
+                    setFramework(typeof next === "string" ? next : null)
+                  }
+                  placeholder="Select a framework"
+                  searchPlaceholder="Search frameworks..."
+                  clearable
+                />
+              </FormField>
+
+              <FormField
+                label="Labels"
+                hint="Multiple select with chips and backspace removal."
+              >
+                <Combobox
+                  options={LABEL_OPTIONS}
+                  value={labels}
+                  onValueChange={(next) =>
+                    setLabels(
+                      Array.isArray(next) ? next : next ? [next] : [],
+                    )
+                  }
+                  multiple
+                  clearable
+                  placeholder="Add label"
+                  searchPlaceholder="Search labels..."
+                />
+              </FormField>
+
+              <FormField
+                label="Workspace"
+                hint="Disabled state with a selected value."
+              >
+                <Combobox
+                  options={WORKSPACE_OPTIONS}
+                  value="nuvio"
+                  disabled
+                />
+              </FormField>
+
+              <FormField
+                label="Team"
+                error="Choose a team to continue."
+              >
+                <Combobox
+                  options={TEAM_OPTIONS}
+                  placeholder="Select a team"
+                  searchPlaceholder="Search teams..."
+                  invalid
+                />
+              </FormField>
+            </div>
+            <p className={styles.hint}>
+              Gunakan panah atas/bawah untuk berpindah opsi, Enter untuk memilih,
+              dan Escape untuk menutup. Mode multiple menyimpan pilihan sebagai
+              chip dan bisa dihapus dengan tombol x atau Backspace.
+            </p>
+          </Section>
+
+          <Section
+            id="attachment"
+            tag="Forms"
+            title="Attachment"
+            description="File cards with media, metadata, upload state, progress, and actions. Use them in composers, message threads, and upload lists."
+          >
+            {attachments.length ? (
+              <div className={styles.attachmentGrid}>
+                {attachments.map((attachment) => (
+                  <Attachment
+                    key={attachment.id}
+                    name={attachment.name}
+                    meta={attachment.meta}
+                    icon={attachment.icon}
+                    state={attachment.state}
+                    progress={attachment.progress}
+                    onOpen={() =>
+                      notify(
+                        "info",
+                        "Preview attachment",
+                        `Opening ${attachment.name}.`,
+                      )
+                    }
+                    onRemove={() => {
+                      setAttachments((previous) =>
+                        previous.filter((item) => item.id !== attachment.id),
+                      );
+                      notify(
+                        "info",
+                        "Attachment removed",
+                        `${attachment.name} removed.`,
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className={styles.attachmentEmpty}>
+                <Icon name="lucide:paperclip" />
+                <span>No attachments. Add a file to see it here.</span>
+              </div>
+            )}
+            <p className={styles.hint}>
+              State upload: idle, uploading, processing, error, dan done. Klik
+              kartu untuk preview, atau tombol x untuk menghapus.
+            </p>
+          </Section>
+
+          <Section
             id="placeholder"
             tag="Loading"
             title="Placeholder"
@@ -1250,7 +1624,7 @@ export default function ComponentShowcase() {
                 <Breadcrumb
                   items={[
                     { label: "Home", href: "/" },
-                    { label: "Tickets", href: "/dashboard" },
+                    { label: "Tickets", href: "/" },
                     { label: "Ticket #2319" },
                   ]}
                 />
@@ -1261,7 +1635,7 @@ export default function ComponentShowcase() {
                 <Breadcrumb
                   items={[
                     { label: "Dashboard", href: "/", icon: "lucide:layout-grid" },
-                    { label: "Tickets", href: "/dashboard", icon: "lucide:ticket" },
+                    { label: "Tickets", href: "/", icon: "lucide:ticket" },
                     { label: "#2319" },
                   ]}
                 />
@@ -1273,15 +1647,14 @@ export default function ComponentShowcase() {
                   separator={<Icon name="lucide:chevron-right" />}
                   items={[
                     { label: "Workspace", href: "/" },
-                    { label: "Settings", href: "/dashboard" },
+                    { label: "Settings", href: "/" },
                     { label: "Billing" },
                   ]}
                 />
               </div>
             </div>
             <p className={styles.hint}>
-              Breadcrumb ini juga dipakai langsung oleh Topbar di halaman showcase
-              dan dashboard.
+              Breadcrumb ini juga dipakai langsung oleh Topbar di halaman showcase.
             </p>
           </Section>
 
@@ -1558,6 +1931,58 @@ export default function ComponentShowcase() {
           </Section>
 
           <Section
+            id="marker"
+            tag="Data display"
+            title="Marker"
+            description="Inline notes, bordered status rows, and labeled separators for conversation and activity threads."
+          >
+            <div className={styles.choiceStack}>
+              <Marker icon="lucide:git-branch">
+                Switched to a new branch fix/frozen-lockfile
+              </Marker>
+              <Marker
+                variant="border"
+                icon="lucide:search"
+                tone="info"
+                meta="4 files"
+              >
+                Explored 4 related files
+              </Marker>
+              <Marker loading tone="info" meta="Live">
+                Compacting conversation…
+              </Marker>
+              <Marker variant="separator">Today</Marker>
+              <Marker
+                variant="border"
+                icon="lucide:circle-alert"
+                tone="danger"
+                meta="Retry"
+              >
+                Failed to connect to the workspace
+              </Marker>
+            </div>
+            <p className={styles.hint}>
+              Variant default untuk catatan inline, border untuk baris status,
+              separator untuk pemisah berlabel. Gunakan loading untuk status yang
+              sedang berjalan.
+            </p>
+          </Section>
+
+          <Section
+            id="trace"
+            tag="Data display"
+            title="Trace"
+            description="A compact list of steps for reasoning, tool calls, and plans. Lines can expand to show detail and reflect running, error, or pending states."
+          >
+            <Trace ariaLabel="Agent trace" items={TRACE_ITEMS} />
+            <p className={styles.hint}>
+              Klik baris yang punya detail untuk membuka output. Status running
+              memakai spinner dan shimmer; error, pending, dan done punya warna
+              masing-masing.
+            </p>
+          </Section>
+
+          <Section
             id="list-group"
             tag="Data display"
             title="List Group"
@@ -1657,9 +2082,16 @@ export default function ComponentShowcase() {
             id="table"
             tag="Data display"
             title="Table"
-            description="Semantic table primitives with a scrollable wrapper, sticky-looking header styling, and aligned cells."
+            description="Semantic table primitives with a flush mode that sits edge-to-edge inside a Card, plus aligned cells and a scrollable wrapper."
+            bodyPadding="none"
+            footer={
+              <p className={styles.hint}>
+                Table dasar tanpa state. Mode flush dipakai saat tabel berada di
+                dalam card agar header sejajar dengan judul card.
+              </p>
+            }
           >
-            <Table ariaLabel="Recent tickets" minWidth={680}>
+            <Table ariaLabel="Recent tickets" minWidth={680} flush>
               <TableHead>
                 <TableRow>
                   <TableHeaderCell>Ticket</TableHeaderCell>
@@ -1694,10 +2126,6 @@ export default function ComponentShowcase() {
                 ))}
               </TableBody>
             </Table>
-            <p className={styles.hint}>
-              Table dasar tanpa state. Pada layar sempit, wrapper tabel bisa
-              di-scroll horizontal.
-            </p>
           </Section>
 
           <Section
@@ -1705,6 +2133,14 @@ export default function ComponentShowcase() {
             tag="Data display"
             title="Data Table"
             description="Search, sortable columns, row selection, pagination, and an empty state built on top of the Table primitives."
+            bodyPadding="none"
+            footer={
+              <p className={styles.hint}>
+                Coba cari, klik header kolom untuk sort, pilih baris, lalu pindah
+                halaman. Toolbar dan footer tetap punya padding sendiri, tabelnya
+                full-bleed di dalam card.
+              </p>
+            }
           >
             <DataTable
               data={DEMO_ROWS}
@@ -1715,11 +2151,8 @@ export default function ComponentShowcase() {
               searchText={searchDemoRows}
               pageSize={5}
               selectable
+              flush
             />
-            <p className={styles.hint}>
-              Coba cari, klik header kolom untuk sort, pilih baris, lalu pindah
-              halaman. Empty state muncul saat pencarian tidak menemukan hasil.
-            </p>
           </Section>
 
           <Section
@@ -1766,6 +2199,68 @@ export default function ComponentShowcase() {
               Modal memakai native <code>&lt;dialog&gt;</code>: fokus terkunci di
               dalam dialog, Escape menutup, dan klik backdrop juga menutup.
             </p>
+          </Section>
+
+          <Section
+            id="alert-dialog"
+            tag="Overlays"
+            title="Alert Dialog"
+            description="A focused confirmation surface for destructive or high-impact actions. Backdrop clicks do not dismiss it."
+          >
+            <div className={styles.row}>
+              <Button
+                label="Publish changes"
+                icon="lucide:upload-cloud"
+                onClick={() => setAlertDialog("publish")}
+              />
+              <Button
+                label="Delete workspace"
+                tone="danger"
+                icon="lucide:trash-2"
+                onClick={() => setAlertDialog("delete")}
+              />
+            </div>
+            <p className={styles.hint}>
+              Alert Dialog memakai <code>role=&quot;alertdialog&quot;</code>, fokus
+              terkunci di dalam dialog, Escape atau Cancel menutup, dan klik
+              backdrop tidak menutup.
+            </p>
+            <AlertDialog
+              open={alertDialog !== null}
+              onOpenChange={(open) => {
+                if (!open) setAlertDialog(null);
+              }}
+              title={
+                alertDialog === "delete"
+                  ? "Delete this workspace?"
+                  : "Publish changes?"
+              }
+              description={
+                alertDialog === "delete"
+                  ? "This permanently deletes the workspace, its tickets, and audit history. This action cannot be undone."
+                  : "This publishes 24 pending changes to the production workspace and notifies every agent."
+              }
+              icon={
+                alertDialog === "delete"
+                  ? "lucide:trash-2"
+                  : "lucide:upload-cloud"
+              }
+              tone={alertDialog === "delete" ? "danger" : "default"}
+              confirmLabel={
+                alertDialog === "delete" ? "Delete workspace" : "Publish changes"
+              }
+              onConfirm={() => {
+                const deleting = alertDialog === "delete";
+                notify(
+                  deleting ? "danger" : "success",
+                  deleting ? "Workspace deleted" : "Changes published",
+                  deleting
+                    ? "The demo workspace was removed."
+                    : "The demo changes are live.",
+                );
+                setAlertDialog(null);
+              }}
+            />
           </Section>
 
           <Section
@@ -2123,7 +2618,7 @@ export default function ComponentShowcase() {
             "Signed out",
             "You have been signed out of the demo workspace.",
           );
-          router.push("/login");
+          setAccountOpen(false);
         }}
       />
 

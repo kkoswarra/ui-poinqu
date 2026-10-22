@@ -15,9 +15,9 @@
 .step:not(:last-child)::after {
   content: "";
   position: absolute;
-  top: 14px;
-  left: 30px;
-  right: 0;
+  top: 13px;
+  left: 14px;
+  right: -14px;
   height: 2px;
   background: var(--color-divider);
   z-index: 0;
@@ -72,8 +72,9 @@ button.stepAction:focus-visible {
 }
 
 .indicator {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   flex-shrink: 0;
   width: 28px;
@@ -93,9 +94,20 @@ button.stepAction:focus-visible {
     box-shadow var(--duration-normal) var(--ease-standard);
 }
 
+.indicator > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .indicator iconify-icon {
+  display: block;
   width: 12px;
   height: 12px;
+  font-size: 12px;
+  line-height: 1;
+  vertical-align: middle;
 }
 
 .step[data-state="complete"] .indicator {
@@ -146,8 +158,8 @@ button.stepAction:focus-visible {
 }
 
 .stepper[data-orientation="vertical"] .step:not(:last-child)::after {
-  top: 30px;
-  bottom: 0;
+  top: 14px;
+  bottom: -14px;
   left: 13px;
   right: auto;
   width: 2px;
@@ -165,8 +177,8 @@ button.stepAction:focus-visible {
   }
 
   .stepper[data-orientation="horizontal"] .step:not(:last-child)::after {
-    top: 30px;
-    bottom: 0;
+    top: 14px;
+    bottom: -14px;
     left: 13px;
     right: auto;
     width: 2px;

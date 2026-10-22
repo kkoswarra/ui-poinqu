@@ -1,0 +1,91 @@
+.marker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--color-secondary);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.marker[data-variant="border"] {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--color-muted);
+}
+
+.marker[data-tone="info"] .icon {
+  color: var(--color-info);
+}
+
+.marker[data-tone="success"] .icon {
+  color: var(--color-success);
+}
+
+.marker[data-tone="warning"] .icon {
+  color: var(--color-warning);
+}
+
+.marker[data-tone="danger"] .icon {
+  color: var(--color-danger);
+}
+
+.marker[data-tone="muted"] .icon {
+  color: var(--color-subtle);
+}
+
+.content {
+  min-width: 0;
+  color: var(--color-secondary);
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.separator::before,
+.separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+.separator span {
+  flex: none;
+  color: var(--color-muted);
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+}
+
+.separator[data-tone="info"] span {
+  color: var(--color-info);
+}
+
+.separator[data-tone="success"] span {
+  color: var(--color-success);
+}
+
+.separator[data-tone="warning"] span {
+  color: var(--color-warning);
+}
+
+.separator[data-tone="danger"] span {
+  color: var(--color-danger);
+}
+
+.meta {
+  margin-left: auto;
+  flex: none;
+  color: var(--color-muted);
+  font-size: 11px;
+}
